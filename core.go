@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 )
 
@@ -12,7 +12,7 @@ type Status struct {
 }
 
 type Operation struct {
-	Name	string	`json:"name"`
+	Name string `json:"name"`
 }
 
 func main() {
@@ -36,7 +36,7 @@ func startServer() {
 }
 
 func statusHttpHandler(writer http.ResponseWriter, response *http.Request) {
-	ok := Status{ Status: "ok"}
+	ok := Status{Status: "ok"}
 	json.NewEncoder(writer).Encode(ok)
 }
 
@@ -44,19 +44,19 @@ func listHttpHandler(writer http.ResponseWriter, response *http.Request) {
 	json.NewEncoder(writer).Encode(operationList())
 }
 
-func operationList() ([]Operation) {
+func operationList() []Operation {
 	type Operations []Operation
 
-	operations := Operations {
-		Operation{ Name: "/status" },
-		Operation{ Name: "/list" },
-		Operation{ Name: "/quit" },
+	operations := Operations{
+		Operation{Name: "/status"},
+		Operation{Name: "/list"},
+		Operation{Name: "/quit"},
 	}
 
 	return operations
 }
 
-//TODO figure out how to get the writer to flush before the aplication shuts down
+//TODO figure out how to get the writer to flush before the application shuts down
 func quitHttpHandler(writer http.ResponseWriter, response *http.Request) {
 	defer shutdown()
 	sendHttpStatusOk(writer)
@@ -73,9 +73,9 @@ func sendByeMessageToClient(writer http.ResponseWriter) {
 }
 
 func printByeMessageToConsole() {
-	fmt.Println("See you next time");
+	fmt.Println("See you next time")
 }
 
 func shutdown() {
-	os.Exit(0)	// 0 == everything is ok
+	os.Exit(0) // 0 == everything is ok
 }
