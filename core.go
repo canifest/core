@@ -25,6 +25,7 @@ func bindHandlers() {
 	http.HandleFunc("/status", statusHttpHandler)
 	http.HandleFunc("/list", listHttpHandler)
 	http.HandleFunc("/quit", quitHttpHandler)
+	http.HandleFunc("/help", helpHttpHandler)
 }
 
 func printWelcomeMessageToConsole() {
@@ -51,6 +52,7 @@ func operationList() []Operation {
 		Operation{Name: "/status"},
 		Operation{Name: "/list"},
 		Operation{Name: "/quit"},
+		Operation{Name: "/help"},
 	}
 
 	return operations
@@ -68,8 +70,22 @@ func sendHttpStatusOk(writer http.ResponseWriter) {
 	writer.WriteHeader(http.StatusOK)
 }
 
+func helpHttpHandler(writer http.ResponseWriter, response *http.Request) {
+	sendHttpStatusOk(writer)
+	sendHelpMessageToClient(writer)
+}
+
 func sendByeMessageToClient(writer http.ResponseWriter) {
 	writer.Write([]byte("bye"))
+}
+
+func sendHelpMessageToClient(writer http.ResponseWriter) {
+	//TODO read welcome text from file so we dont have to edit source to modify as we evolve
+	var helpText string
+	helpText += "Welcome to Canifest! To make this work properly, make sure you "
+	helpText += "start the core rest server before you run the CLI.\n"
+	helpText += "./bin/core from your GOPATH"
+	writer.Write([]byte(helpText))
 }
 
 func printByeMessageToConsole() {
