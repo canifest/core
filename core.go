@@ -22,17 +22,19 @@ func main() {
 }
 
 func bindHandlers() {
-	http.HandleFunc("/status", statusHttpHandler)
-	http.HandleFunc("/list", listHttpHandler)
-	http.HandleFunc("/quit", quitHttpHandler)
+	http.HandleFunc("/api/status", statusHttpHandler)
+	http.HandleFunc("/api/list", listHttpHandler)
+	http.HandleFunc("/api/quit", quitHttpHandler)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 }
 
 func printWelcomeMessageToConsole() {
 	fmt.Println("Now listening on :9993")
 }
 
+
 func startServer() {
-	http.ListenAndServe(":9993", nil)
+	http.ListenAndServe(":3000", nil)
 }
 
 func statusHttpHandler(writer http.ResponseWriter, response *http.Request) {
