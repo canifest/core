@@ -34,7 +34,7 @@ func printWelcomeMessageToConsole() {
 
 
 func startServer() {
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":9993", nil)
 }
 
 func statusHttpHandler(writer http.ResponseWriter, response *http.Request) {
