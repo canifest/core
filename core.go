@@ -5,7 +5,24 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"io/ioutil"
 )
+
+type Dockerfile struct {
+    Add []string `json:"add"`
+    Cmd []string `json:"cmd"`
+    Copy []string `json:"copy"`
+    Entrypoint string `json:"entrypoint"`
+    Env map[string]string `json:"env"`
+    Expose []string `json:"expose"`
+    From string `json:"from"`
+    Label map[string]string `json:"label"`
+    Maintainer string `json:"maintainer"`
+    Run []string `json:"run"`
+    User int `json:"user"`
+    Volume []string `json:"volume"`
+    Workdir string `json:"workdir"`
+}
 
 type Status struct {
 	Status string `json:"status"`
@@ -26,6 +43,28 @@ func bindHandlers() {
 	http.HandleFunc("/list", listHttpHandler)
 	http.HandleFunc("/quit", quitHttpHandler)
 	http.HandleFunc("/help", helpHttpHandler)
+	http.HandleFunc("/dockerfile", dockerfileHttpHandler)
+}
+
+func operationList() []Operation {
+	type Operations []Operation
+
+	operations := Operations{
+		Operation{Name: "/status"},
+		Operation{Name: "/list"},
+		Operation{Name: "/quit"},
+		Operation{Name: "/help"},
+		Operation{Name: "/dockerfile"},
+	}
+
+	return operations
+}
+
+func generateDockerfile() Dockerfile {
+
+	dockerfile := Dockerfile{Entrypoint: "/here"}
+
+	return dockerfile
 }
 
 func printWelcomeMessageToConsole() {
@@ -45,17 +84,8 @@ func listHttpHandler(writer http.ResponseWriter, response *http.Request) {
 	json.NewEncoder(writer).Encode(operationList())
 }
 
-func operationList() []Operation {
-	type Operations []Operation
-
-	operations := Operations{
-		Operation{Name: "/status"},
-		Operation{Name: "/list"},
-		Operation{Name: "/quit"},
-		Operation{Name: "/help"},
-	}
-
-	return operations
+func dockerfileHttpHandler(writer http.ResponseWriter, response *http.Request) {
+	json.NewEncoder(writer).Encode(generateDockerfile())
 }
 
 //TODO figure out how to get the writer to flush before the application shuts down
@@ -79,13 +109,19 @@ func sendByeMessageToClient(writer http.ResponseWriter) {
 	writer.Write([]byte("bye"))
 }
 
+func readHelpFile() string {
+	pwd, _ := os.Getwd()
+	dat, err := ioutil.ReadFile(pwd+"/../src/core/help.txt")
+    check(err)
+    return string(dat)
+}
+
 func sendHelpMessageToClient(writer http.ResponseWriter) {
-	//TODO read welcome text from file so we dont have to edit source to modify as we evolve
+
 	var helpText string
-	helpText += "Welcome to Canifest! To make this work properly, make sure you "
-	helpText += "start the core rest server before you run the CLI.\n"
-	helpText += "./bin/core from your GOPATH"
-	writer.Write([]byte(helpText))
+	helpText = readHelpFile()
+
+	json.NewEncoder(writer).Encode(helpText)
 }
 
 func printByeMessageToConsole() {
@@ -94,4 +130,10 @@ func printByeMessageToConsole() {
 
 func shutdown() {
 	os.Exit(0) // 0 == everything is ok
+}
+
+func check(e error) {
+    if e != nil {
+        panic(e)
+    }
 }

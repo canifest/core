@@ -1,0 +1,1 @@
+Welcome to Canifest! To make this work properly, make sure you start the core rest server before you run the CLI. This is located at ./bin/core from your GOPATH.
