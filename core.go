@@ -44,17 +44,18 @@ func bindHandlers() {
 	http.HandleFunc("/quit", quitHttpHandler)
 	http.HandleFunc("/help", helpHttpHandler)
 	http.HandleFunc("/dockerfile", dockerfileHttpHandler)
+	http.Handle("/", http.FileServer(http.Dir("./static")))
 }
 
 func operationList() []Operation {
 	type Operations []Operation
 
 	operations := Operations{
-		Operation{Name: "/status"},
-		Operation{Name: "/list"},
-		Operation{Name: "/quit"},
-		Operation{Name: "/help"},
-		Operation{Name: "/dockerfile"},
+		Operation{Name: "/api/status"},
+		Operation{Name: "/api/list"},
+		Operation{Name: "/api/quit"},
+		Operation{Name: "/api/help"},
+		Operation{Name: "/api/dockerfile"},
 	}
 
 	return operations
@@ -70,6 +71,7 @@ func generateDockerfile() Dockerfile {
 func printWelcomeMessageToConsole() {
 	fmt.Println("Now listening on :9993")
 }
+
 
 func startServer() {
 	http.ListenAndServe(":9993", nil)
