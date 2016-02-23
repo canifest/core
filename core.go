@@ -39,11 +39,11 @@ func main() {
 }
 
 func bindHandlers() {
-	http.HandleFunc("/status", statusHttpHandler)
-	http.HandleFunc("/list", listHttpHandler)
-	http.HandleFunc("/quit", quitHttpHandler)
-	http.HandleFunc("/help", helpHttpHandler)
-	http.HandleFunc("/dockerfile", dockerfileHttpHandler)
+	http.HandleFunc("/api/status", statusHttpHandler)
+	http.HandleFunc("/api/list", listHttpHandler)
+	http.HandleFunc("/api/quit", quitHttpHandler)
+	http.HandleFunc("/api/help", helpHttpHandler)
+	http.HandleFunc("/api/dockerfile", dockerfileHttpHandler)
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 }
 
