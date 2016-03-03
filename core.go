@@ -3,26 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"io/ioutil"
-)
 
-type Dockerfile struct {
-    Add []string `json:"add"`
-    Cmd []string `json:"cmd"`
-    Copy []string `json:"copy"`
-    Entrypoint string `json:"entrypoint"`
-    Env map[string]string `json:"env"`
-    Expose []string `json:"expose"`
-    From string `json:"from"`
-    Label map[string]string `json:"label"`
-    Maintainer string `json:"maintainer"`
-    Run []string `json:"run"`
-    User int `json:"user"`
-    Volume []string `json:"volume"`
-    Workdir string `json:"workdir"`
-}
+	"github.com/canifest/core/dockerfile"
+	"github.com/gorilla/mux"
+)
 
 type Status struct {
 	Status string `json:"status"`
@@ -39,12 +26,16 @@ func main() {
 }
 
 func bindHandlers() {
-	http.HandleFunc("/api/status", statusHttpHandler)
-	http.HandleFunc("/api/list", listHttpHandler)
-	http.HandleFunc("/api/quit", quitHttpHandler)
-	http.HandleFunc("/api/help", helpHttpHandler)
-	http.HandleFunc("/api/dockerfile", dockerfileHttpHandler)
-	http.Handle("/", http.FileServer(http.Dir("./static")))
+	router := mux.NewRouter()
+	subrouter := router.PathPrefix("/api").Subrouter()
+	subrouter.HandleFunc("/status", statusHttpHandler).Methods("GET")
+	subrouter.HandleFunc("/list", listHttpHandler).Methods("GET")
+	subrouter.HandleFunc("/quit", quitHttpHandler).Methods("GET")
+	subrouter.HandleFunc("/help", helpHttpHandler).Methods("GET")
+	dockerfileService := dockerfile.NewDockerfileService()
+	subrouter = dockerfileService.RegisterEndpoints(subrouter)
+	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./static/")))
+	http.Handle("/", router)
 }
 
 func operationList() []Operation {
@@ -61,17 +52,9 @@ func operationList() []Operation {
 	return operations
 }
 
-func generateDockerfile() Dockerfile {
-
-	dockerfile := Dockerfile{Entrypoint: "/here"}
-
-	return dockerfile
-}
-
 func printWelcomeMessageToConsole() {
 	fmt.Println("Now listening on :9993")
 }
-
 
 func startServer() {
 	http.ListenAndServe(":9993", nil)
@@ -84,10 +67,6 @@ func statusHttpHandler(writer http.ResponseWriter, response *http.Request) {
 
 func listHttpHandler(writer http.ResponseWriter, response *http.Request) {
 	json.NewEncoder(writer).Encode(operationList())
-}
-
-func dockerfileHttpHandler(writer http.ResponseWriter, response *http.Request) {
-	json.NewEncoder(writer).Encode(generateDockerfile())
 }
 
 //TODO figure out how to get the writer to flush before the application shuts down
@@ -113,9 +92,9 @@ func sendByeMessageToClient(writer http.ResponseWriter) {
 
 func readHelpFile() string {
 	pwd, _ := os.Getwd()
-	dat, err := ioutil.ReadFile(pwd+"/../src/core/help.txt")
-    check(err)
-    return string(dat)
+	dat, err := ioutil.ReadFile(pwd + "/../src/core/help.txt")
+	check(err)
+	return string(dat)
 }
 
 func sendHelpMessageToClient(writer http.ResponseWriter) {
@@ -135,7 +114,7 @@ func shutdown() {
 }
 
 func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+	if e != nil {
+		panic(e)
+	}
 }
